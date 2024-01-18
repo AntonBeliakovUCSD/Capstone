@@ -1,0 +1,209 @@
+---
+title: "Scaling Susie"
+output: html_document
+date: "2024-01-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Import Packages
+
+```{r}
+library(susieR)
+library(bigsnpr)
+library(data.table)
+setwd("/Users/gurmandhaliwal/Library/CloudStorage/Dropbox/180B")
+```
+
+## Import Data
+```{r}
+gene_exp = read.table("gene_expression.txt")
+gene_annotation <- read.table("gene_annotation.txt", header=TRUE)
+
+snp_data_list <- list()
+for (chr in 1:22) {  # Assuming chromosomes 1-22
+    #bed_file <- paste0("LDREF/1000G.EUR.", chr, ".bed")
+    #snp_data_list[[chr]] <- snp_readBed(bed_file)
+    rds_file <- paste0("/Users/gurmandhaliwal/Library/CloudStorage/Dropbox/180B/LDREF/1000G.EUR.", chr, ".rds")
+    snp_data_list[[chr]] <- readRDS(rds_file)
+}
+
+```
+
+## Clean data and define functions 
+```{r}
+colnames(gene_exp) <- as.character(unlist(gene_exp[1, ]))
+gene_exp_df <- gene_exp[-1, ]  
+```
+
+All functions
+
+```{r}
+process_gene_expression <- function(gene_exp_df, target_id, chromosome) {
+    snp_data <- snp_data_list[[chromosome]]
+    
+    gene_exp_ids <- colnames(gene_exp_df)[5:ncol(gene_exp_df)]
+    fam_ids <- snp_data$fam$sample.ID
+    common_ids <- intersect(gene_exp_ids, fam_ids)
+    fixed_cols <- c("TargetID", "Gene_Symbol", "Chr", "Coord")
+    
+    gene_exp_subset <- gene_exp_df[, c(fixed_cols, common_ids)]
+    fam_data_subset <- snp_data$fam[snp_data$fam$sample.ID %in% common_ids, ]
+    individual_order <- fam_data_subset$sample.ID
+    new_col_order <- c(fixed_cols, individual_order)
+    gene_exp_ordered <- gene_exp_subset[, new_col_order]
+    
+    x = paste(target_id, chromosome, sep = ".")
+    trait_df <- subset(gene_exp_ordered, grepl(target_id, TargetID))
+    
+    if (nrow(trait_df) == 0) {
+        return(NULL) 
+    }
+    
+    trait_df <- trait_df[, -c(1:4)]
+    trait_df_transposed <- t(trait_df)
+    y_trait_df <- data.frame(exp = trait_df_transposed)
+    y_trait_df$user_id <- rownames(y_trait_df)
+    colnames(y_trait_df) <- c("exp", "user")
+
+    return(y_trait_df)
+}
+```
+
+
+Note: ENSG00000223972 and a bunch more just have locations out there like 11869 and so no snps in range. Also some gene ids like ENSG00000186092 might be present in gene_exp_df but not in gene_annotation
+
+```{r}
+get_genotype_data_for_position <- function(gene_exp_df, target_id, y_trait_output, chromosome, range = 500000) {
+    snp_data <- snp_data_list[[chromosome]]
+
+    position <- gene_exp_df[grepl(target_id, gene_exp_df$TargetID), "Coord"]
+    position = as.numeric(position)
+    lower_bound <- position - range
+    upper_bound <- position + range
+    snp_map <- snp_data$map
+    
+    selected_snps <- which(snp_map$physical.pos >= lower_bound & snp_map$physical.pos <= upper_bound)
+    
+    if (length(selected_snps) == 0) {
+        return(NULL)  
+    }
+    
+    
+    X <- snp_data$genotypes[, selected_snps, drop = FALSE]
+    
+    geno_ids <- snp_data$fam$sample.ID
+    pheno_ids <- y_trait_output$user
+    order_indices <- match(pheno_ids, geno_ids)
+    
+    X_aligned <- X[order_indices, ]
+
+    return(X_aligned)
+}
+```
+
+```{r}
+get_susie_output <- function(gene_exp_df, target_id, chromosome) {
+    Y <- process_gene_expression(gene_exp_df, target_id, chromosome)
+  
+    X <- get_genotype_data_for_position(gene_exp_df, target_id, Y, chromosome)
+
+    if (is.null(X) || ncol(X) == 0) {
+        return("NA")  
+    }
+  
+    susie_output <- susie(X, as.numeric(Y$exp), L = 10)
+    beta_hat <- susie_output$pip 
+    pve <- beta_hat^2
+    total_causal_variance <- sum(pve)
+
+    return(total_causal_variance)
+}
+
+
+
+```
+
+## Apply Functions to All Gene Ids
+
+```{r}
+results <- lapply(gene_annotation$SYM, function(gene_id) {
+    tryCatch({
+        chromosome <- gene_annotation[gene_annotation$SYM == gene_id, "CHR"]
+
+        total_causal_variance <- get_susie_output(gene_exp_df, gene_id, chromosome)
+        list(GeneID = gene_id, Chromosome = chromosome, CausalVariance = total_causal_variance)
+    }, error = function(e) {
+        message("Error with gene_id: ", gene_id, "; Error: ", e$message)
+        return(list(GeneID = gene_id, Chromosome = NA, CausalVariance = NA))
+    })
+})
+results_df <- do.call(rbind, results)
+
+```
+
+## Visualize Results
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+causal_variance <- results_df[, "CausalVariance"]
+causal_variance_clean <- causal_variance[causal_variance != "NA"]
+causal_variance_clean <- as.numeric(causal_variance_clean)
+plot_df <- data.frame(CausalVariance = causal_variance_clean)
+ggplot(plot_df, aes(x = CausalVariance)) +
+  geom_histogram(binwidth = 0.1, fill = "Dark Blue", color = "black") +
+  scale_x_continuous(limits = c(NA, 3)) + # Set x-axis limits with upper limit at 3
+  theme_minimal(base_family = "Helvetica", base_size = 12) +
+  theme(plot.background = element_rect(fill = "white", color = NA), # Cute background color
+        panel.background = element_rect(fill = "lightgrey", color = NA), # Panel color
+        plot.title = element_text(hjust = 0.5, face = "bold")) +
+  labs(title = "Distribution of Causal Variance",
+       x = "Causal Variance",
+       y = "Frequency")
+```
+
+Log Transformed Values
+```{r}
+ggplot(plot_df, aes(x = log(CausalVariance))) +
+  geom_histogram(binwidth = 0.1, fill = "Dark Blue", color = "black") +
+  scale_x_continuous(limits = c(NA, 3)) + 
+  theme_minimal(base_family = "Helvetica", base_size = 12) +
+  theme(plot.background = element_rect(fill = "white", color = NA), # Cute background color
+        panel.background = element_rect(fill = "lightgrey", color = NA), # Panel color
+        plot.title = element_text(hjust = 0.5, face = "bold")) +
+  labs(title = "Distribution of Log Transformed Causal Variance",
+       x = "Causal Variance",
+       y = "Frequency")
+```
+
+Save Data to CSV
+```{r}
+resultsdf = data.frame(results_df)
+resultsdf$Chromosome <- unlist(resultsdf$Chromosome)
+resultsdf$CausalVariance <- unlist(resultsdf$CausalVariance)
+resultsdf$GeneID <- unlist(resultsdf$GeneID)
+write.csv(resultsdf, "causal_variance.csv", row.names = TRUE)
+```
+
+Boxplot 
+```{r}
+cleaned_df$Chromosome <- unlist(cleaned_df$Chromosome)
+cleaned_df$CausalVariance <- unlist(cleaned_df$CausalVariance)
+cleaned_df$GeneID <- unlist(cleaned_df$GeneID)
+
+cleaned_df <- subset(resultsdf, CausalVariance != "NA")
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(cleaned_df, aes(x = factor(Chromosome), y = CausalVariance)) +
+  geom_boxplot() +
+  labs(x = "Chromosome", y = "Causal Variance")
+
+```
+

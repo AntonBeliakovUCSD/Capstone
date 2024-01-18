@@ -1,0 +1,137 @@
+---
+title: "Week1"
+output: html_document
+date: "2024-01-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Calculating Causal Variances Using SuSiE
+
+## Import Packages and Data
+
+Packages
+```{r pressure, echo=FALSE}
+library(susieR)
+library(bigsnpr)
+library(data.table)
+```
+
+Data
+```{r}
+gene_exp = read.table("gene_expression.txt")
+bed_file <- "LDREF/1000G.EUR.1.bed"
+snp_data <- snp_readBed(bed_file)
+#the snp_data is too big to be loaded immediately so another file is created for it 
+snp_data <- readRDS("/Users/gurmandhaliwal/Library/CloudStorage/Dropbox/180B/LDREF/1000G.EUR.1.rds")
+
+```
+
+
+## Prepare Y (Gene Expression Data)
+```{r}
+colnames(gene_exp) <- as.character(unlist(gene_exp[1, ]))
+gene_exp_df <- gene_exp[-1, ]  
+```
+
+
+Define General Function. This takes in the TargetID of the trait and outputs a cleaned table. 
+```{r}
+# General Function
+process_gene_expression <- function(target_id) {
+    gene_exp_ids <- colnames(gene_exp_df)[5:ncol(gene_exp_df)]
+    fam_ids <- snp_data$fam$sample.ID
+    common_ids <- intersect(gene_exp_ids, fam_ids)
+    fixed_cols <- c("TargetID", "Gene_Symbol", "Chr", "Coord")
+    
+    # subset to fam users and reorder
+    gene_exp_subset <- gene_exp_df[, c(fixed_cols, common_ids)]
+    fam_data_subset <- snp_data$fam[snp_data$fam$sample.ID %in% common_ids, ]
+    individual_order <- fam_data_subset$sample.ID
+    new_col_order <- c(fixed_cols, individual_order)
+    gene_exp_ordered <- gene_exp_subset[, new_col_order]
+
+    # get specific trait
+    trait_df <- subset(gene_exp_ordered, TargetID == target_id)
+
+    # Prep the final dataframe
+    trait_df <- trait_df[, -c(1:4)]
+    trait_df_transposed <- t(trait_df)
+    y_trait_df <- data.frame(exp = trait_df_transposed)
+    y_trait_df$user_id <- rownames(y_trait_df)
+    colnames(y_trait_df) <- c("exp", "user")
+
+    return(y_trait_df)
+}
+
+```
+
+```{r}
+y_trait_output <- process_gene_expression( target_id = "ENSG00000163531.10")
+
+```
+
+
+##  Preparing X
+
+This function takes in a position and returns X. 
+
+```{r}
+get_genotype_data_for_position <- function(position, y_trait_output, range = 500000) {
+    lower_bound <- position - range
+    upper_bound <- position + range
+    snp_map <- snp_data$map
+
+    selected_snps <- which(snp_map$physical.pos >= lower_bound & snp_map$physical.pos <= upper_bound)
+
+    X <- snp_data$genotypes[, selected_snps, drop = FALSE]
+    
+    geno_ids <- snp_data$fam$sample.ID
+    pheno_ids <- y_trait_output$user
+    order_indices <- match(pheno_ids, geno_ids)
+    
+    X <- X[order_indices, ]
+
+    return(X)
+}
+
+```
+
+```{r}
+position <- 204797779  
+X_output <- get_genotype_data_for_position(position = position, y_trait_output)
+
+```
+
+
+
+```{r}
+get_susie_output <- function(TargetID, position) {
+  
+  Y <- process_gene_expression( target_id = TargetID)
+  
+  X <- get_genotype_data_for_position(position = position, Y)
+  
+  susie_output <- susie(X, as.numeric(Y$exp), L = 4)  
+  
+  #get effect size estimates
+  beta_hat <- susie_output$pip 
+  #print(susie_output)
+  pve <- beta_hat^2
+  # Sum to get total causal variance
+  total_causal_variance <- sum(pve)
+
+  
+  return (total_causal_variance)
+}
+```
+
+
+```{r}
+get_susie_output("ENSG00000163531.10", 204797779)
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
