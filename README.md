@@ -11,8 +11,8 @@ This project aims to answer the question how heritability correlates with causal
 - **causal_variance_snps.csv**: Causal Variance Scores and Number of Causal SNPs per gene id
 - **gene_annotation.txt**: Supplementary gene id information
 - **heritability_scores.csv**: Scores for each gene id
-- **Summary Statistics**: [http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST007001-GCST008000/GCST007236/harmonised/](Link to Summary Statistics - Too large to be attatched)
-- **GERP Scores**: [https://genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=compGeno&hgta_track=allHg19RS_BW&hgta_table=allHg19RS_BW&hgta_doSchema=describe+table+schema](Link to GERP Scores - Too large to be attatched)
+- **Summary Statistics**: [Link to Summary Statistics - Too large to be attatched](http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST007001-GCST008000/GCST007236/harmonised/)
+- **GERP Scores**: [Link to GERP Scores - Too large to be attatched](https://genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=compGeno&hgta_track=allHg19RS_BW&hgta_table=allHg19RS_BW&hgta_doSchema=describe+table+schema)
 
 ### Scripts 
 - **Data Viz, GERP Analysis, TWAS Interpretation.ipynb**: A working notebook that has exploratory data visualizations, GERP score analysis, and the beginning of a TWAS interpretation. 
@@ -25,4 +25,8 @@ This project aims to answer the question how heritability correlates with causal
 
 ## To Recreate Analysis
 
-This project used multiple languages and tools including Python, R, the GCTA command line tool, and plink2. Ensure that all languages are set up before running the notebooks or attempting to recreate the files from scratch. Once the analysis is completely finished, the team will work on integrating the different components to make the re-creation more seamless for a third party. 
+This project used multiple languages and tools including Python, R, the GCTA command line tool, and plink2. Ensure that all languages are set up before running the notebooks or attempting to recreate the files from scratch. Use the following command: 
+```
+pip install -r requirements.txt
+```
+Once the analysis is completely finished, the team will work on integrating the different components to make the re-creation more seamless for a third party. Currently, one should be able to run the code and follow the reading structure. However, this will be more generalized so that one can run a TWAS by inserting their own summary statistics file and specifying a few parameters. 
