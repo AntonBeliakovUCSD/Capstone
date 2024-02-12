@@ -11,8 +11,9 @@ This project aims to answer the question how heritability correlates with causal
 - **causal_variance_snps.csv**: Causal Variance Scores and Number of Causal SNPs per gene id
 - **gene_annotation.txt**: Supplementary gene id information
 - **heritability_scores.csv**: Scores for each gene id
-- **Summary Statistics**: [Link to Summary Statistics - Too large to be attatched](http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST007001-GCST008000/GCST007236/harmonised/)
+- **Summary Statistics**: [Link to Summary Statistics - Too large to be attatched - rename it to bc](http://ftp.ebi.ac.uk/pub/databases/gwas/summary_statistics/GCST007001-GCST008000/GCST007236/harmonised/)
 - **GERP Scores**: [Link to GERP Scores - Too large to be attatched](https://genome.ucsc.edu/cgi-bin/hgTables?db=hg19&hgta_group=compGeno&hgta_track=allHg19RS_BW&hgta_table=allHg19RS_BW&hgta_doSchema=describe+table+schema)
+- **BRCA**: These are the weights for the TWAS analysis, please download the appropriate ones from this link. These could not be pushed onto github. [Link - Download the Breast Invasive Carcinoma folder and rename it BRCA] (http://gusevlab.org/projects/fusion/) 
 
 ### Scripts 
 - **Data Viz, GERP Analysis, TWAS Interpretation.ipynb**: A working notebook that has exploratory data visualizations, GERP score analysis, and the beginning of a TWAS interpretation. 
