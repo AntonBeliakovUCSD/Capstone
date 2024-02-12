@@ -23,10 +23,41 @@ This project aims to answer the question how heritability correlates with causal
 - **Scaling-Susie.Rmd**: A R script to fine map all gene ids. 
 - **susie_function.Rmd**: A R script that calculated the causal variance for one gene id. 
 
-## To Recreate Analysis
+## To Recreate TWAS Analysis
+
+The bulk of the reproducable analysis in our project will be the TWAS, where the user can specify a trait and see a plot with significant SNPs. 
 
 This project used multiple languages and tools including Python, R, the GCTA command line tool, and plink2. Ensure that all languages are set up before running the notebooks or attempting to recreate the files from scratch. Use the following command: 
 ```
-pip install -r requirements.txt
+git clone https://github.com/AntonBeliakovUCSD/Capstone.git
+
+cd Capstone 
+
+pip3 install -r requirements.txt
 ```
-Once the analysis is completely finished, the team will work on integrating the different components to make the re-creation more seamless for a third party. Currently, one should be able to run the code and follow the reading structure. However, this will be more generalized so that one can run a TWAS by inserting their own summary statistics file and specifying a few parameters. 
+
+Please note that you have to download the summary statistics such as bc.h.tsv from the GWAS Catelog. They cannot be uploaded to GitHub due to size. 
+
+This step will take in the raw summary statistics and output a prepared file for TWAS analysis. This step can take minutes. 
+```
+python3 src/clean_summary_stats.py data/bc.h.tsv "['variant_id', 'effect_allele', 'other_allele', 'Z']" data/BreastCarcinoma_GWAS.txt
+```
+
+Run the TWAS command in Terminal
+```
+Rscript src/FUSION.assoc_test.R \
+--sumstats data/BreastCarcinoma_GWAS.txt_summary_stats.txt \
+--weights ./data/BRCA/TCGA-BRCA.TUMOR.pos \
+--weights_dir ./data/BRCA/ \
+--ref_ld_chr ./data/LDREF/1000G.EUR. \
+--chr 22 \
+--out data/BreastCarcinoma.22.dat
+```
+
+Clean the TWAS Output. This output can be used for a variety of interpretations and significance testing. A Manhatten plot with labeled SNPs will also be shown! 
+
+```
+python3 src/twas_scripts.py data/BreastCarcinoma.22.dat
+```
+
+Once the TWAS analysis is completely finished, the team will work on integrating the different components to make the re-creation more seamless for a third party. Currently, one should be able to run the code and follow the reading structure. However, this will be more generalized so that one can run a TWAS by inserting their own summary statistics file and specifying a few parameters. 
