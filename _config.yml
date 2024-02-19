@@ -2,44 +2,55 @@ url: https://antonbeliakovucsd.github.io
 baseurl: /Capstone/
 
 # Site settings
-title: Awesome Title
-email: your-email@domain.com
-description: "Write an awesome description for your new site here. You can edit this line in _config.yml. It will appear in your document head meta (for Google search results) and in your feed.xml site description."
+title: How does Heritability Correlate With Causal Variance?
+email: 
+description: "Exploring the relationship between heritability estimates and the causal variance exhibited by SNPs for a range of diseases"
 
 
 # Team names, titles and social links
 people:
-- name: Kay Garland
+- name: Gurman Dhaliwal
   pic: 1
-  position: Lead Designer
+  position: Researcher
   social:
-    - title: twitter
+    - title: Email
+      url: # gdhaliwa@ucsd.edu
+    - title: 
       url: #
-    - title: facebook
-      url: #
-    - title: stack-overflow
+    - title: 
       url: #
 
-- name: Larry Parker
+- name: Lihao Liu
   pic: 2
-  position: Lead Marketer
+  position: Researcher
   social:
-    - title: twitter
+    - title: Email
+      url: # liliu@ucsd.edu
+    - title: 
       url: #
-    - title: facebook
-      url: #
-    - title: linkedin
+    - title: 
       url: #
 
-- name: Diana Petersen
+- name: Anton Beliakov
   pic: 3
-  position: Lead Developer
+  position: Researcher
   social:
-    - title: twitter
+    - title: Email
+      url: # abeliako@ucsd.edu
+    - title:
       url: #
-    - title: facebook
+    - title:
       url: #
-    - title: google-plus
+
+- name: Dr. Amariuta
+  pic: 4
+  position: Mentor
+  social:
+    - title: Email
+      url: # tamariutabartell@ucsd.edu
+    - title:
+      url: #
+    - title:
       url: #
 
 # Social networks usernames (many more available: google-plus, flickr, dribbble, pinterest, instagram, tumblr, linkedin, etc.)
