@@ -2,7 +2,7 @@ url: https://antonbeliakovucsd.github.io
 baseurl: /Capstone/
 
 # Site settings
-title: How does Heritability Correlate With Causal Variance?
+title: Heritability and Causal Variance
 email: 
 description: "Exploring the relationship between heritability estimates and the causal variance exhibited by SNPs for a range of diseases"
 
@@ -15,10 +15,6 @@ people:
   social:
     - title: Email
       url: # gdhaliwa@ucsd.edu
-    - title: 
-      url: #
-    - title: 
-      url: #
 
 - name: Lihao Liu
   pic: 2
@@ -26,10 +22,6 @@ people:
   social:
     - title: Email
       url: # liliu@ucsd.edu
-    - title: 
-      url: #
-    - title: 
-      url: #
 
 - name: Anton Beliakov
   pic: 3
@@ -37,10 +29,6 @@ people:
   social:
     - title: Email
       url: # abeliako@ucsd.edu
-    - title:
-      url: #
-    - title:
-      url: #
 
 - name: Dr. Amariuta
   pic: 4
@@ -48,10 +36,6 @@ people:
   social:
     - title: Email
       url: # tamariutabartell@ucsd.edu
-    - title:
-      url: #
-    - title:
-      url: #
 
 # Social networks usernames (many more available: google-plus, flickr, dribbble, pinterest, instagram, tumblr, linkedin, etc.)
 social:
