@@ -37,28 +37,46 @@ cd Capstone
 pip3 install -r requirements.txt
 ```
 
-Please note that you have to download the summary statistics such as bc.h.tsv from the GWAS Catelog. They cannot be uploaded to GitHub due to size. 
+To Run The TWAS for all chromosomes for all the cancers in our analysis, follow the following steps. 
 
-This step will take in the raw summary statistics and output a prepared file for TWAS analysis. This step can take minutes. 
-```
-python3 src/clean_summary_stats.py data/bc.h.tsv "['variant_id', 'effect_allele', 'other_allele', 'Z']" data/BreastCarcinoma_GWAS.txt
-```
+1. Unzip the Weight Files and Prepare Summary Statistics
+The weight files for this analysis include TCGA-BRCA.TUMOR.tar.bz2, TCGA-OV.TUMOR.tar.bz2, TCGA-PRAD.TUMOR.tar.bz2, and TCGA-SKCM.TUMOR.tar.bz2. 
 
-Run the TWAS command in Terminal
-```
-Rscript src/FUSION.assoc_test.R \
---sumstats data/BreastCarcinoma_GWAS.txt_summary_stats.txt \
---weights ./data/BRCA/TCGA-BRCA.TUMOR.pos \
---weights_dir ./data/BRCA/ \
---ref_ld_chr ./data/LDREF/1000G.EUR. \
---chr 22 \
---out data/BreastCarcinoma.22.dat
-```
+Ensure that your summary statistics are in the data folder. FIX THIS LATER - how to include summary statistics zipped. 
+2. Run the TWAS Command in CMD or Terminal
 
-Clean the TWAS Output. This output can be used for a variety of interpretations and significance testing. A Manhatten plot with labeled SNPs will also be shown! 
+This is the general format of the command in case you want to run it for another cancer not specified in this analysis. 
 
 ```
-python3 src/twas_scripts.py data/BreastCarcinoma.22.dat
+./src/twas_all_chromosomes.sh path/to/sumstats path/to/weights path/to/weights_dir desired_name path/to/output
 ```
 
-Once the TWAS analysis is completely finished, the team will work on integrating the different components to make the re-creation more seamless for a third party. Currently, one should be able to run the code and follow the reading structure. However, this will be more generalized so that one can run a TWAS by inserting their own summary statistics file and specifying a few parameters. 
+These are the commands to rerun for this particular analysis.
+
+Skin Cutaneous Melanoma
+```
+./src/twas_all_chromosomes.sh data/UKB_460K.cancer_MELANOMA.sumstats data/TCGA-SKCM.TUMOR/TCGA-SKCM.TUMOR.pos data/TCGA-SKCM.TUMOR Melanoma output 
+```
+Breast Invasive Carcinoma
+```
+./src/twas_all_chromosomes.sh data/PASS_BreastCancer.sumstats data/TCGA-BRCA.TUMOR/TCGA-BRCA.TUMOR.pos data/TCGA-BRCA.TUMOR breast_carcinoma output 
+```
+Prostate Adenocarcinoma
+```
+./src/twas_all_chromosomes.sh data/PASS_ProstateCancer.sumstats data/TCGA-PRAD.TUMOR/TCGA-PRAD.TUMOR.pos data/TCGA-PRAD.TUMOR prostate_cancer output 
+```
+
+Note that many genes were skipped, especially on chromosome 6,9,
+12 for prostate cancer. 
+
+Ovarian Serous Cystadenocarcinoma
+```
+./src/twas_all_chromosomes.sh data/PASS_OvarianCancer.sumstats data/TCGA-OV.TUMOR/TCGA-OV.TUMOR.pos data/TCGA-OV.TUMOR ovarian_cancer output 
+```
+3. Analyze Results in R
+
+Run the script "Analyzing TWAS Results.Rmd" and Manhattan plots and Miami plots will be saved for each cancer in the output folder. 
+
+How should we improve this?
+
+Make the script executable on it's own? o
