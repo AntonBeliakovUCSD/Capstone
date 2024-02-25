@@ -1,0 +1,129 @@
+---
+title: "Analyzing TWAS Results"
+output: html_document
+date: "2024-02-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Install Packages
+
+```{r}
+#install.packages("qqman")
+#install.packages("ggplot2")
+library(ggplot2)
+install.packages("ggrepel")
+library(ggrepel)
+ 
+
+```
+
+```{r}
+# Set working directory
+setwd("/Users/gurmandhaliwal/Capstone/output")
+print(getwd())
+
+# List of cancer types (prefixes of your files)
+cancer_types <- c("Melanoma", "breast_carcinoma", "ovarian_cancer", "prostate_cancer")
+
+# Loop through each cancer type
+for(cancer in cancer_types) {
+  
+  # List files for the current cancer type
+  files <- list.files(pattern = paste0(cancer, ".*\\.dat$"), full.names = TRUE)
+  
+  # Read and bind data for the current cancer type
+  twas_results <- do.call(rbind, lapply(files, read.table, header = TRUE))
+  twas_results$POS <- with(twas_results, (P0 + P1) / 2)
+  twas_results$CHR <- as.factor(twas_results$CHR)
+  
+  # Generate plots for the current cancer type
+  
+  ## Manhattan Plot
+  # Calculate significance threshold
+  significance_threshold <- -log10(0.05 / dim(twas_results)[1])
+  
+  # Generate and print Manhattan plot
+  manhattan_plot <- ggplot(twas_results, aes(x = POS, y = -log10(TWAS.P), colour = CHR)) +
+    geom_point(alpha = 0.6, size = 1.2) +
+    scale_colour_manual(values = rainbow(length(unique(twas_results$CHR)))) +
+    geom_hline(yintercept = significance_threshold, linetype = "dashed", color = "red") +
+    theme_minimal() +
+    labs(title = paste0("Manhattan Plot"), x = "Position", y = "-log10(p-value)", colour = "Chromosome") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+  # Adding labels for significant SNPs
+  significant_snps <- subset(twas_results, -log10(TWAS.P) > significance_threshold)
+  if(nrow(significant_snps) > 0) {
+    manhattan_plot <- manhattan_plot +
+      geom_text_repel(data = significant_snps,
+                      aes(label = ID),  
+                      nudge_y = 0.1,  
+                      size = 3)  
+  }
+  
+  # Print the Manhattan plot for the current cancer type
+  print(manhattan_plot)
+  manhattan_plot_name <- paste0("Manhattan_", cancer, ".png") # .png can be changed to other formats like .pdf
+  ggsave(filename = manhattan_plot_name, plot = manhattan_plot, path = getwd(), width = 10, height = 8, dpi = 300)
+  
+  ## Miami Plot
+  # Assuming you want to compare the same data against itself for the Miami plot
+  #maimia plot
+  twas_results2 <- twas_results
+  significance_threshold <- -log10(0.05 / dim(twas_results)[1])
+  significance_threshold2 <- -log10(0.05 / dim(twas_results2)[1])
+  
+  # maanhatten1
+  manhattan_plot1 <- ggplot(twas_results, aes(x = POS, y = -log10(TWAS.P), colour = CHR)) +
+    geom_point(alpha = 0.6, size = 1.2) +
+    scale_colour_manual(values = rainbow(length(unique(twas_results$CHR)))) +
+    geom_hline(yintercept = significance_threshold, linetype = "dashed", color = "red") +
+    theme_minimal()
+  
+  # maanhatten2
+  manhattan_plot2 <- ggplot(twas_results2, aes(x = POS, y = log10(TWAS.P), colour = CHR)) +
+    geom_point(alpha = 0.6, size = 1.2) +
+    scale_colour_manual(values = rainbow(length(unique(twas_results2$CHR)))) +
+    geom_hline(yintercept = -significance_threshold2, linetype = "dashed", color = "blue") +
+    theme_minimal()
+  
+  #inverted plot
+  miami_plot <- ggplot() +
+    geom_point(data = twas_results, aes(x = POS, y = -log10(TWAS.P), colour = CHR), alpha = 0.6, size = 1.2) +
+    geom_point(data = twas_results2, aes(x = POS, y = log10(TWAS.P), colour = CHR), alpha = 0.6, size = 1.2) +
+    scale_colour_manual(values = rainbow(length(unique(c(twas_results$CHR, twas_results2$CHR))))) +
+    geom_hline(yintercept = significance_threshold, linetype = "dashed", color = "red") +
+    geom_hline(yintercept = -significance_threshold2, linetype = "dashed", color = "blue") +
+    theme_minimal() +
+    labs(title = "Miami Plot", x = "Position", y = "log10(p-value)") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1), plot.title = element_text(hjust = 0.5))
+  
+  # labels
+  significant_snps1 <- subset(twas_results, -log10(TWAS.P) > significance_threshold)
+  significant_snps2 <- subset(twas_results2, -log10(TWAS.P) > significance_threshold2)
+  if(nrow(significant_snps1) > 0) {
+    miami_plot <- miami_plot +
+      geom_text_repel(data = significant_snps1,
+                      aes(x = POS, y = -log10(TWAS.P), label = ID),
+                      nudge_y = 0.1, size = 3)
+  }
+  if(nrow(significant_snps2) > 0) {
+    miami_plot <- miami_plot +
+      geom_text_repel(data = significant_snps2,
+                      aes(x = POS, y = log10(TWAS.P), label = ID),
+                      nudge_y = -0.1, size = 3)
+  }
+  
+  print(miami_plot)
+  miami_plot_name <- paste0("Miami_", cancer, ".png") # .png can be changed to other formats like .pdf
+  ggsave(filename = miami_plot_name, plot = miami_plot, path = getwd(), width = 10, height = 8, dpi = 300)
+}
+
+```
+
+
+
+
