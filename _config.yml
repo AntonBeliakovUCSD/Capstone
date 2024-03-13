@@ -13,6 +13,9 @@ mentor:
   pic: 1
   position: Mentor
   email: tamariutabartell@ucsd.edu
+  social:
+    - title: linkedin
+      url:
 
 people:
 - name: Gurman Dhaliwal
@@ -22,6 +25,8 @@ people:
   social:
     - title: github
       url: https://github.com/GKD-stack
+    - title: linkedin
+      url:
 
 - name: Lihao Liu
   pic: 3
@@ -30,6 +35,8 @@ people:
   social:
     - title: github
       url: https://github.com/llh1201
+    - title: linkedin
+      url:
 
 - name: Anton Beliakov
   pic: 4
@@ -38,6 +45,8 @@ people:
   social:
     - title: github
       url: https://github.com/AntonBeliakovUCSD
+    - title: linkedin
+      url: www.linkedin.com/in/anton-beliakov-a3b112217
 
 
 
@@ -45,6 +54,8 @@ people:
 social:
   - title: github
     url: https://github.com/AntonBeliakovUCSD/Capstone
+  - title: report
+    url: https://drive.google.com/file/d/1dDTIaAgFiv3PqccQx0vxUpQeoQchqfxl/view?usp=sharing
 
 # Postal address (add as many lines as necessary)
 address:
