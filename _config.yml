@@ -12,31 +12,32 @@ mentor:
 - name: Dr. Amariuta
   pic: 1
   position: Mentor
-  social:
-    - title: Email
-      url: # tamariutabartell@ucsd.edu
+  email: tamariutabartell@ucsd.edu
 
 people:
 - name: Gurman Dhaliwal
   pic: 2
   position: Researcher
+  email: gdhaliwa@ucsd.edu 
   social:
     - title: github
-      url: https://github.com/GKD-stack # gdhaliwa@ucsd.edu 
+      url: https://github.com/GKD-stack
 
 - name: Lihao Liu
   pic: 3
   position: Researcher
+  email: liliu@ucsd.edu
   social:
     - title: github
-      url: https://github.com/llh1201 # liliu@ucsd.edu
+      url: https://github.com/llh1201
 
 - name: Anton Beliakov
   pic: 4
   position: Researcher
+  email: abeliako@ucsd.edu
   social:
     - title: github
-      url: https://github.com/AntonBeliakovUCSD # abeliako@ucsd.edu
+      url: https://github.com/AntonBeliakovUCSD
 
 
 
