@@ -10,7 +10,7 @@ description: "Exploring the relationship between heritability estimates and the 
 # Team names, titles and social links
 mentor:
 - name: Dr. Amariuta
-  pic: 1
+  pic: Amariuta
   position: Mentor
   email: tamariutabartell@ucsd.edu
   social:
@@ -19,7 +19,7 @@ mentor:
 
 people:
 - name: Gurman Dhaliwal
-  pic: 2
+  pic: Gurman
   position: Researcher
   email: gdhaliwa@ucsd.edu 
   social:
@@ -29,7 +29,7 @@ people:
       url: https://www.linkedin.com/in/gurman-dhaliwal/
 
 - name: Lihao Liu
-  pic: 3
+  pic: Lihao
   position: Researcher
   email: liliu@ucsd.edu
   social:
@@ -39,7 +39,7 @@ people:
       url: https://www.linkedin.com/in/lihaoliu1201/
 
 - name: Anton Beliakov
-  pic: 4
+  pic: Anton
   position: Researcher
   email: abeliako@ucsd.edu
   social:
