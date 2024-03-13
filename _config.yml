@@ -21,37 +21,29 @@ people:
   pic: 2
   position: Researcher
   social:
-    - title: Email
-      url: # gdhaliwa@ucsd.edu
+    - title: github
+      url: https://github.com/GKD-stack # gdhaliwa@ucsd.edu 
 
 - name: Lihao Liu
   pic: 3
   position: Researcher
   social:
-    - title: Email
-      url: # liliu@ucsd.edu
+    - title: github
+      url: https://github.com/llh1201 # liliu@ucsd.edu
 
 - name: Anton Beliakov
   pic: 4
   position: Researcher
   social:
-    - title: Email
-      url: # abeliako@ucsd.edu
+    - title: github
+      url: https://github.com/AntonBeliakovUCSD # abeliako@ucsd.edu
 
 
 
 # Social networks usernames (many more available: google-plus, flickr, dribbble, pinterest, instagram, tumblr, linkedin, etc.)
 social:
-  - title: twitter
-    url: http://twitter.com/jekyllrb
-  - title: facebook
-    url:
-  - title: stack-overflow
-    url: http://stackoverflow.com/questions/tagged/jekyll
-  - title: bitbucket 
-    url: http://bitbucket.org/jekyll
   - title: github
-    url: http://github.com/jekyll
+    url: https://github.com/AntonBeliakovUCSD/Capstone
 
 # Postal address (add as many lines as necessary)
 address:
