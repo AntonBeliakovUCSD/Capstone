@@ -11,22 +11,28 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Import Packages
 
 ```{r}
+#install.packages("susieR")
+#install.packages("bigsnpr")
+#install.packages("data.table")
+#install.packages("dplyr")
+#install.packages("ggplot2")
 library(susieR)
 library(bigsnpr)
 library(data.table)
-setwd("/Users/gurmandhaliwal/Library/CloudStorage/Dropbox/180B")
+library(ggplot2)
+library(dplyr)
 ```
 
 ## Import Data
 ```{r}
+setwd("../data") 
 gene_exp = read.table("gene_expression.txt")
 gene_annotation <- read.table("gene_annotation.txt", header=TRUE)
 
 snp_data_list <- list()
-for (chr in 1:22) {  # Assuming chromosomes 1-22
-    #bed_file <- paste0("LDREF/1000G.EUR.", chr, ".bed")
-    #snp_data_list[[chr]] <- snp_readBed(bed_file)
-    rds_file <- paste0("/Users/gurmandhaliwal/Library/CloudStorage/Dropbox/180B/LDREF/1000G.EUR.", chr, ".rds")
+for (chr in 1:22) {  
+    rds_file <- paste0("LDREF/1000G.EUR.", chr, ".rds")
+    print(rds_file)
     snp_data_list[[chr]] <- readRDS(rds_file)
 }
 
@@ -147,19 +153,16 @@ results_df <- do.call(rbind, results)
 ## Visualize Results
 
 ```{r}
-library(ggplot2)
-library(dplyr)
-
 causal_variance <- results_df[, "CausalVariance"]
 causal_variance_clean <- causal_variance[causal_variance != "NA"]
 causal_variance_clean <- as.numeric(causal_variance_clean)
 plot_df <- data.frame(CausalVariance = causal_variance_clean)
 ggplot(plot_df, aes(x = CausalVariance)) +
   geom_histogram(binwidth = 0.1, fill = "Dark Blue", color = "black") +
-  scale_x_continuous(limits = c(NA, 3)) + # Set x-axis limits with upper limit at 3
+  scale_x_continuous(limits = c(NA, 3)) + 
   theme_minimal(base_family = "Helvetica", base_size = 12) +
-  theme(plot.background = element_rect(fill = "white", color = NA), # Cute background color
-        panel.background = element_rect(fill = "lightgrey", color = NA), # Panel color
+  theme(plot.background = element_rect(fill = "white", color = NA), 
+        panel.background = element_rect(fill = "lightgrey", color = NA), 
         plot.title = element_text(hjust = 0.5, face = "bold")) +
   labs(title = "Distribution of Causal Variance",
        x = "Causal Variance",
@@ -172,8 +175,8 @@ ggplot(plot_df, aes(x = log(CausalVariance))) +
   geom_histogram(binwidth = 0.1, fill = "Dark Blue", color = "black") +
   scale_x_continuous(limits = c(NA, 3)) + 
   theme_minimal(base_family = "Helvetica", base_size = 12) +
-  theme(plot.background = element_rect(fill = "white", color = NA), # Cute background color
-        panel.background = element_rect(fill = "lightgrey", color = NA), # Panel color
+  theme(plot.background = element_rect(fill = "white", color = NA), 
+        panel.background = element_rect(fill = "lightgrey", color = NA),
         plot.title = element_text(hjust = 0.5, face = "bold")) +
   labs(title = "Distribution of Log Transformed Causal Variance",
        x = "Causal Variance",
@@ -182,10 +185,12 @@ ggplot(plot_df, aes(x = log(CausalVariance))) +
 
 Save Data to CSV
 ```{r}
+setwd("../output") 
 resultsdf = data.frame(results_df)
 resultsdf$Chromosome <- unlist(resultsdf$Chromosome)
 resultsdf$CausalVariance <- unlist(resultsdf$CausalVariance)
 resultsdf$GeneID <- unlist(resultsdf$GeneID)
+#change filepath as needed
 write.csv(resultsdf, "causal_variance.csv", row.names = TRUE)
 ```
 
@@ -199,8 +204,6 @@ cleaned_df <- subset(resultsdf, CausalVariance != "NA")
 ```
 
 ```{r}
-library(ggplot2)
-
 ggplot(cleaned_df, aes(x = factor(Chromosome), y = CausalVariance)) +
   geom_boxplot() +
   labs(x = "Chromosome", y = "Causal Variance")

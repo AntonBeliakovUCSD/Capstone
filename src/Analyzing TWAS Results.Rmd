@@ -11,41 +11,35 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Install Packages
 
 ```{r}
+# Please install all packages
 #install.packages("qqman")
 #install.packages("ggplot2")
 library(ggplot2)
-install.packages("ggrepel")
+#install.packages("ggrepel")
+#install.packages("dplyr")
 library(ggrepel)
- 
-
+library(dplyr)
 ```
 
 ```{r}
-# Set working directory
-setwd("/Users/gurmandhaliwal/Capstone/output")
-print(getwd())
+setwd("../output") 
 
-# List of cancer types (prefixes of your files)
+
 cancer_types <- c("Melanoma", "breast_carcinoma", "ovarian_cancer", "prostate_cancer")
+combined_twas_results <- data.frame()
 
-# Loop through each cancer type
 for(cancer in cancer_types) {
-  
-  # List files for the current cancer type
   files <- list.files(pattern = paste0(cancer, ".*\\.dat$"), full.names = TRUE)
-  
-  # Read and bind data for the current cancer type
+  files <- files[!grepl("susie", files)]
+
   twas_results <- do.call(rbind, lapply(files, read.table, header = TRUE))
   twas_results$POS <- with(twas_results, (P0 + P1) / 2)
   twas_results$CHR <- as.factor(twas_results$CHR)
+  twas_results$cancer_type <- cancer
+  combined_twas_results <- rbind(combined_twas_results, twas_results)
   
-  # Generate plots for the current cancer type
-  
-  ## Manhattan Plot
-  # Calculate significance threshold
   significance_threshold <- -log10(0.05 / dim(twas_results)[1])
   
-  # Generate and print Manhattan plot
   manhattan_plot <- ggplot(twas_results, aes(x = POS, y = -log10(TWAS.P), colour = CHR)) +
     geom_point(alpha = 0.6, size = 1.2) +
     scale_colour_manual(values = rainbow(length(unique(twas_results$CHR)))) +
@@ -54,7 +48,6 @@ for(cancer in cancer_types) {
     labs(title = paste0("Manhattan Plot"), x = "Position", y = "-log10(p-value)", colour = "Chromosome") +
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
   
-  # Adding labels for significant SNPs
   significant_snps <- subset(twas_results, -log10(TWAS.P) > significance_threshold)
   if(nrow(significant_snps) > 0) {
     manhattan_plot <- manhattan_plot +
@@ -64,14 +57,11 @@ for(cancer in cancer_types) {
                       size = 3)  
   }
   
-  # Print the Manhattan plot for the current cancer type
   print(manhattan_plot)
-  manhattan_plot_name <- paste0("Manhattan_", cancer, ".png") # .png can be changed to other formats like .pdf
+  manhattan_plot_name <- paste0("Manhattan_", cancer, ".png") 
   ggsave(filename = manhattan_plot_name, plot = manhattan_plot, path = getwd(), width = 10, height = 8, dpi = 300)
   
-  ## Miami Plot
-  # Assuming you want to compare the same data against itself for the Miami plot
-  #maimia plot
+  #maimi
   twas_results2 <- twas_results
   significance_threshold <- -log10(0.05 / dim(twas_results)[1])
   significance_threshold2 <- -log10(0.05 / dim(twas_results2)[1])
@@ -118,12 +108,77 @@ for(cancer in cancer_types) {
   }
   
   print(miami_plot)
-  miami_plot_name <- paste0("Miami_", cancer, ".png") # .png can be changed to other formats like .pdf
+  miami_plot_name <- paste0("Miami_", cancer, ".png") 
   ggsave(filename = miami_plot_name, plot = miami_plot, path = getwd(), width = 10, height = 8, dpi = 300)
 }
 
 ```
 
+## Save TWAS Results Without SuSiE
+```{r}
+setwd("../output")
+write.csv(combined_twas_results, "full_twas_default.csv", row.names = TRUE)
+```
+## Save Results with SuSiE Model
 
+```{r}
+setwd("../output")
+cancer_types <- c("Melanoma", "breast_carcinoma", "ovarian_cancer", "prostate_cancer")
+
+combined_twas_results_susie <- data.frame()
+
+for(cancer in cancer_types) {
+  files <- list.files(pattern = paste0(cancer, ".*\\.dat$"), full.names = TRUE)
+  files <- files[grepl("susie", files)]
+
+  twas_results <- do.call(rbind, lapply(files, read.table, header = TRUE))
+  twas_results$POS <- with(twas_results, (P0 + P1) / 2)
+  twas_results$CHR <- as.factor(twas_results$CHR)
+  twas_results$cancer_type <- cancer
+  combined_twas_results_susie <- rbind(combined_twas_results_susie, twas_results)
+}
+write.csv(combined_twas_results_susie, "full_twas_susie.csv", row.names = TRUE)
+```
+
+
+## Compare results
+```{r}
+combined_twas_results_susie <- combined_twas_results_susie %>%
+  mutate(across(everything(), ~gsub("top1", "susie", .)))
+
+```
+
+```{r}
+combined_twas_results %>%
+  count(MODEL) %>%
+  arrange(desc(n))
+
+combined_twas_results_susie %>%
+  count(MODEL) %>%
+  arrange(desc(n))
+
+```
+
+```{r}
+effective_model_combined_twas_results <- combined_twas_results %>%
+  group_by(MODEL) %>%
+  summarize(Avg_MODELCV.R2 = mean(MODELCV.R2, na.rm = TRUE),
+            Min_MODELCV.PV = min(MODELCV.PV, na.rm = TRUE)) %>%
+  arrange(desc(Avg_MODELCV.R2), Min_MODELCV.PV) 
+print(effective_model_combined_twas_results)
+
+```
+```{r}
+combined_twas_results_susie$MODELCV.R2 = as.numeric(combined_twas_results_susie$MODELCV.R2)
+combined_twas_results_susie$MODELCV.PV = as.numeric(combined_twas_results_susie$MODELCV.PV)
+effective_model_combined_twas_results_susie <- combined_twas_results_susie %>%
+  group_by(MODEL) %>%
+  summarize(Avg_MODELCV.R2 = mean(MODELCV.R2, na.rm = TRUE),
+            Min_MODELCV.PV = min(MODELCV.PV, na.rm = TRUE)) %>%
+  arrange(desc(Avg_MODELCV.R2), Min_MODELCV.PV) 
+
+print(effective_model_combined_twas_results_susie)
+
+```
 
 
