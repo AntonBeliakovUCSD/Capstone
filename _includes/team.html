@@ -12,7 +12,7 @@
                 {% for member in site.people %}
                 <div class="col-sm-4">
                     <div class="team-member">
-                        <img src="img/team/{{ member.pic }}.jpg" class="img-responsive img-circle" alt="">
+                        <img src="img/team/{{ member.pic }}.jpg" class="img-responsive img-circle" alt="Team member">
                         <h4>{{ member.name }}</h4>
                         <p class="text-muted">{{ member.position }}
                             <br> {{member.email}}
@@ -32,12 +32,12 @@
                 {% endfor %}
             </div>
 
-            <div class="row" style="margin: 0 auto">
+            <div class="row" style="margin-left: auto; margin-right:auto; display: block; width: 120%">
                 {% for mentor in site.mentor %}
                 <div class="col-sm-4">
 
                     <div class="team-member">
-                        <img src="img/team/{{ mentor.pic }}.jpg" class="img-responsive img-circle" alt="">
+                        <img src="img/team/{{ mentor.pic }}.jpg" class="img-responsive img-circle" alt="Mentor">
                         <h4>{{ mentor.name }}</h4>
                         <p class="text-muted">{{ mentor.position }}
                             <br> {{mentor.email}}
