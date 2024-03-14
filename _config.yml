@@ -8,7 +8,7 @@ description: "Exploring the relationship between heritability estimates and the 
 
 
 # Team names, titles and social links
-people:
+jsahdkjhasdk:
 - name: Dr. Amariuta
   pic: Amariuta
   position: Mentor
@@ -47,6 +47,14 @@ people:
       url: https://github.com/AntonBeliakovUCSD
     - title: linkedin
       url: https://www.linkedin.com/in/anton-k-beliakov
+
+- name: Dr. Amariuta
+  pic: Amariuta
+  position: Mentor
+  email: tamariutabartell@ucsd.edu
+  social:
+    - title: website
+      url: https://www.amariutalab.org/
 
 
 
