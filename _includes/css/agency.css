@@ -4,12 +4,6 @@
  * For details, see http://www.apache.org/licenses/LICENSE-2.0.
  */
 
-img {
-    max-width: 100%;
-    height: auto;
-    width: auto\9;
-}
-
 body {
     overflow-x: hidden;
     font-family: "Roboto Slab","Helvetica Neue",Helvetica,Arial,sans-serif;
