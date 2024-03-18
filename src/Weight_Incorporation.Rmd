@@ -17,68 +17,13 @@ credible_sets_df = read.csv("../data/credible_sets_df.csv", header = TRUE)
 ```
 
 
-
 ```{r}
 subpaths <- c("TCGA-BRCA.TUMOR/TCGA-BRCA.TUMOR",
               "TCGA-OV.TUMOR/TCGA-OV.TUMOR",
               "TCGA-PRAD.TUMOR/TCGA-PRAD.TUMOR",
               "TCGA-SKCM.TUMOR/TCGA-SKCM.TUMOR")
 
-base_path <- "../data"
-setwd(base_path)
-
-summary_df <- data.frame(File = character(), Heritability = numeric(), BetaSquared = numeric(), stringsAsFactors = FALSE)
-
-print(getwd())
-update_rdat_files <- function(path) {
-  summary_df <- data.frame(File = character(), Heritability = numeric(), BetaSquared = numeric(), stringsAsFactors = FALSE)
-    
-  full_path <- file.path(base_path, path)
-  print(full_path)
-  setwd(full_path)
-  rdat_files <- list.files(pattern = "\\.RDat$", full.names = TRUE)
-  
-  for (ex_file in rdat_files) {
-    load(ex_file)
-    wgt.matrix <- as.data.frame(wgt.matrix)
-    #wgt.matrix$susie <- wgt.matrix$top1
-    snps_to_update <- !(row.names(wgt.matrix) %in% credible_sets_df$Credible_Set)
-    wgt.matrix$top1[snps_to_update] <- 0
-    
-    beta_squared_sum <- sum(wgt.matrix$top1^2)
-    
-    wgt.matrix <- data.matrix(wgt.matrix)
-    summary_df <- rbind(summary_df, data.frame(File = basename(ex_file), Heritability = hsq, BetaSquared = beta_squared_sum))
-    
-    #create a new wgt file to not overide old one
-    new_subpath <- "Updated_SKCM/TCGA-SKCM.TUMOR"
-    new_dir <- file.path(base_path, new_subpath)
-    if (!dir.exists(new_dir)) {
-      dir.create(new_dir, recursive = TRUE)
-    }
-    new_file_path <- file.path(new_dir, basename(ex_file))
-    print(new_file_path)
-    
-    save(wgt.matrix, cv.performance, snps, hsq, hsq.pv, N.tot, file = new_file_path)
-
-  }
-  return(summary_df)
-}
-
-#apply it to each cancer
-for (path in subpaths) {
-  summary_df <- rbind(summary_df, update_rdat_files(path))
-}
-
-```
-
-```{r}
-subpaths <- c("TCGA-BRCA.TUMOR/TCGA-BRCA.TUMOR",
-              "TCGA-OV.TUMOR/TCGA-OV.TUMOR",
-              "TCGA-PRAD.TUMOR/TCGA-PRAD.TUMOR",
-              "TCGA-SKCM.TUMOR/TCGA-SKCM.TUMOR")
-
-base_path <- "../data"
+base_path <- "/Users/gurmandhaliwal/Capstone/data"
 setwd(base_path)
 
 summary_df <- data.frame(File = character(), Heritability = numeric(), BetaSquared = numeric(), stringsAsFactors = FALSE)
@@ -113,8 +58,6 @@ update_rdat_files <- function(path) {
         dir.create(new_dir, recursive = TRUE)
       }
       new_file_path <- file.path(new_dir, basename(ex_file))
-      print(new_file_path) 
-      
       save(wgt.matrix, cv.performance, snps, hsq, hsq.pv, N.tot, file = new_file_path)
     }
   }
@@ -139,6 +82,24 @@ library(dplyr)
 summary_df_clean <- summary_df %>% 
   filter(BetaSquared != 0)
 ```
+
+Regular Regression: 
+```{r}
+ggplot(summary_df_clean, aes(x = BetaSquared, y = Heritability)) + 
+  geom_point(aes(color = Heritability), size = 3) +
+  geom_smooth(method = "lm", color = "blue", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Heritability vs. BetaSquared",
+       x = "Beta Squared",
+       y = "Heritability") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+```{r}
+model_log <- lm(Heritability ~ BetaSquared, data = summary_df_clean)
+summary(model_log)
+```
+
 
 ```{r}
 summary_df_clean <- summary_df_clean %>%
